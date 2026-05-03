@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/Applications/MAMP/Library/bin/mysql80/bin/mysql -h 127.0.0.1 -P 8889 -u root --password='' esign)",
+      "Bash(/Applications/MAMP/Library/bin/mysql80/bin/mysql -h 127.0.0.1 -P 8889 -u root --password='' esign -e \"SHOW TABLES; DESCRIBE documents; DESCRIBE recipients; DESCRIBE signatures;\")",
+      "Bash(node -e \"import\\('pdf-lib'\\).then\\(m => console.log\\('pdf-lib OK, version:', m.PDFDocument ? 'loaded' : 'missing'\\)\\)\")"
+    ]
+  }
+}
