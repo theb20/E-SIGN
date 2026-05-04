@@ -15,15 +15,14 @@ const PORT = process.env.PORT || 3001
 
 /* ── Middlewares ─────────────────────────────────────────── */
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
+  'https://app-esign.web.app',
+  'https://app-esign.firebaseapp.com',
   'http://localhost:5173',
   'http://localhost:4173',
+  process.env.FRONTEND_URL,
 ].filter(Boolean)
 app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true)
-    cb(new Error(`CORS bloqué : ${origin}`))
-  },
+  origin: (origin, cb) => cb(null, !origin || allowedOrigins.includes(origin)),
   credentials: true,
 }))
 app.use(express.json({ limit: '20mb' }))
