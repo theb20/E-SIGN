@@ -40,6 +40,17 @@ app.use('/api/templates', templateRoutes)
 
 app.get('/api/health', (_req, res) => res.json({ ok: true, ts: new Date() }))
 
+/* ── TEMP: clear uploads ─────────────────────────────────── */
+app.delete('/api/admin/clear-uploads', (_req, res) => {
+  try {
+    const files = fs.readdirSync(UPLOAD_DIR)
+    files.forEach(f => fs.unlinkSync(path.join(UPLOAD_DIR, f)))
+    res.json({ deleted: files.length, files })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
 /* ── 404 ─────────────────────────────────────────────────── */
 app.use((_req, res) => res.status(404).json({ error: 'Route introuvable' }))
 
