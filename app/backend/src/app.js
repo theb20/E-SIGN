@@ -14,7 +14,18 @@ const app  = express()
 const PORT = process.env.PORT || 3001
 
 /* ── Middlewares ─────────────────────────────────────────── */
-app.use(cors({ origin: process.env.FRONTEND_URL || '*' }))
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:4173',
+].filter(Boolean)
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true)
+    cb(new Error(`CORS bloqué : ${origin}`))
+  },
+  credentials: true,
+}))
 app.use(express.json({ limit: '20mb' }))
 app.use(express.urlencoded({ extended: true }))
 
