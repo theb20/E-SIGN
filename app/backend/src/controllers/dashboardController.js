@@ -94,7 +94,7 @@ export async function sendReminder(req, res) {
     if (!r) return res.status(404).json({ error: 'Destinataire introuvable' })
     if (r.status !== 'pending') return res.status(400).json({ error: 'Le destinataire a déjà signé ou refusé' })
 
-    const baseUrl  = process.env.FRONTEND_URL || 'http://localhost:5173'
+    const baseUrl  = process.env.FRONTEND_URL 
     const signingUrl = `${baseUrl}/sign/${r.signing_token}`
 
     sendReminderEmail({
