@@ -9,6 +9,13 @@ const UPLOAD_DIR = path.join(__dirname, '../../uploads')
 // Reference render width used in the frontend (max pageWidth)
 const RENDER_WIDTH = 794
 
+function sniffFormat(bytes) {
+  if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) return 'pdf'   // %PDF
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) return 'png'   // \x89PNG
+  if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return 'jpeg'                        // JPEG SOI
+  return 'unknown'
+}
+
 /**
  * Build a signed PDF from a document + its fields + all recipients' signatures.
  * Returns a Buffer containing the final PDF bytes.
@@ -17,24 +24,24 @@ export async function buildSignedPdf(doc, fields, recipients) {
   const filePath = path.join(UPLOAD_DIR, doc.file_path)
 
   if (!fs.existsSync(filePath)) {
-    throw new Error(`Fichier introuvable sur le serveur : ${filePath}. Le fichier a peut-être été perdu après un redémarrage du serveur. Veuillez re-téléverser le document.`)
+    throw new Error(`Fichier introuvable sur le serveur. Le fichier a peut-être été perdu après un redémarrage. Veuillez re-téléverser le document.`)
   }
 
+  const fileBytes = fs.readFileSync(filePath)
+  const fmt = sniffFormat(fileBytes)
   let pdfDoc
 
-  if (doc.file_type === 'pdf') {
-    const bytes = fs.readFileSync(filePath)
-    pdfDoc = await PDFDocument.load(bytes)
-  } else {
-    // Image document: create a 1-page PDF with the image
+  if (fmt === 'pdf') {
+    pdfDoc = await PDFDocument.load(fileBytes)
+  } else if (fmt === 'png' || fmt === 'jpeg') {
     pdfDoc = await PDFDocument.create()
-    const imgBytes = fs.readFileSync(filePath)
-    const ext = path.extname(doc.file_path).toLowerCase()
-    const img = ext === '.png'
-      ? await pdfDoc.embedPng(imgBytes)
-      : await pdfDoc.embedJpg(imgBytes)
+    const img = fmt === 'png'
+      ? await pdfDoc.embedPng(fileBytes)
+      : await pdfDoc.embedJpg(fileBytes)
     const page = pdfDoc.addPage([img.width, img.height])
     page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height })
+  } else {
+    throw new Error(`Format de fichier non supporté pour la génération PDF (format détecté : ${fmt}). Utilisez PDF, PNG ou JPEG.`)
   }
 
   const pages      = pdfDoc.getPages()

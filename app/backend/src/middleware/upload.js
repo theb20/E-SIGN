@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
   },
 })
 
-const ALLOWED = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp']
+const ALLOWED = ['application/pdf', 'image/png', 'image/jpeg']
 
 export const upload = multer({
   storage,
