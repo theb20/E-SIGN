@@ -2,6 +2,7 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import path from 'path'
+import fs from 'fs'
 import { fileURLToPath } from 'url'
 import { testConnection } from './config/database.js'
 import documentRoutes   from './routes/documents.js'
@@ -9,7 +10,10 @@ import signingRoutes    from './routes/signing.js'
 import dashboardRoutes  from './routes/dashboard.js'
 import templateRoutes   from './routes/templates.js'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __dirname  = path.dirname(fileURLToPath(import.meta.url))
+const UPLOAD_DIR = path.join(__dirname, '../../uploads')
+fs.mkdirSync(UPLOAD_DIR, { recursive: true })
+
 const app  = express()
 const PORT = process.env.PORT || 3001
 
