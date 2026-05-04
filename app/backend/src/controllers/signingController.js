@@ -164,28 +164,22 @@ export async function exportSignedByToken(req, res) {
     const recipient = await Recipient.findByToken(req.params.token)
     if (!recipient) return res.status(404).json({ error: 'Lien invalide' })
 
-    const doc        = await Document.findById(recipient.doc_id)
-    const fields     = await Field.findByDocument(recipient.doc_id)
-    const allRecips  = await Recipient.findByDocument(recipient.doc_id)
+    const doc    = await Document.findById(recipient.doc_id)
+    const fields = await Field.findByRecipient(recipient.id)
+    const sigs   = await Signature.findByRecipient(recipient.id)
+    const sigMap = {}
+    for (const s of sigs) sigMap[s.field_id] = s.data
 
-    const recipientsWithSigs = await Promise.all(
-      allRecips.map(async (r) => {
-        const sigs = await Signature.findByRecipient(r.id)
-        const sigMap = {}
-        for (const s of sigs) sigMap[s.field_id] = s.data
-        return { ...r, signatures: sigMap }
-      })
-    )
-
-    const pdfBuffer = await buildSignedPdf(doc, fields, recipientsWithSigs)
-    const filename  = `${doc.title}_signé.pdf`.replace(/[^a-zA-Z0-9À-ÿ_\-. ]/g, '_')
+    const pdfBuffer = await buildSignedPdf(doc, fields, [{ ...recipient, signatures: sigMap }])
+    const filename  = `${doc.title}_${recipient.name || recipient.email}_signé.pdf`
+      .replace(/[^a-zA-Z0-9À-ÿ_\-. ]/g, '_')
 
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
     res.setHeader('Content-Length', pdfBuffer.length)
     res.send(pdfBuffer)
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: 'Erreur génération PDF' })
+    console.error('exportSignedByToken error:', err.message)
+    res.status(500).json({ error: err.message || 'Erreur génération PDF' })
   }
 }

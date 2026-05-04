@@ -16,6 +16,10 @@ const RENDER_WIDTH = 794
 export async function buildSignedPdf(doc, fields, recipients) {
   const filePath = path.join(UPLOAD_DIR, doc.file_path)
 
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Fichier introuvable sur le serveur : ${filePath}. Le fichier a peut-être été perdu après un redémarrage du serveur. Veuillez re-téléverser le document.`)
+  }
+
   let pdfDoc
 
   if (doc.file_type === 'pdf') {
