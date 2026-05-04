@@ -62,10 +62,10 @@ export default function SendScreen({ documentId, signerCount = 1, onBack, onSent
 
   /* ── Success view ──────────────────────────────────────────── */
   if (result) return (
-    <div className="min-h-screen bg-[#F4F4F4] flex items-center justify-center p-8">
+    <div className="min-h-screen bg-[#F4F4F4] flex items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-xl bg-white" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.1)', borderRadius: '2px' }}>
         <div className="h-1 rounded-t-sm" style={{ background: sendMode === 'bulk' ? '#7B4FFF' : '#2DA44E' }} />
-        <div className="p-8">
+        <div className="p-4 sm:p-8">
           <div className="w-14 h-14 mx-auto mb-4 rounded-full flex items-center justify-center"
             style={{ background: sendMode === 'bulk' ? '#F3EEFF' : '#E8F5E9' }}>
             <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -121,10 +121,10 @@ export default function SendScreen({ documentId, signerCount = 1, onBack, onSent
   const accentColor = sendMode === 'bulk' ? '#7B4FFF' : '#1473E6'
 
   return (
-    <div className="min-h-screen bg-[#F4F4F4] flex items-center justify-center p-8">
+    <div className="min-h-screen bg-[#F4F4F4] flex items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-xl bg-white" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.1)', borderRadius: '2px' }}>
         <div className="h-1 rounded-t-sm" style={{ background: accentColor }} />
-        <div className="p-8">
+        <div className="p-4 sm:p-8">
           <h1 className="text-[20px] font-bold text-[#1B1B1B] mb-5">Envoyer pour signature</h1>
 
           {/* Mode toggle */}
@@ -144,7 +144,7 @@ export default function SendScreen({ documentId, signerCount = 1, onBack, onSent
                 </svg>
                 Multi-signatures
               </div>
-              <p className="text-[10px] font-normal mt-0.5 opacity-80">Chacun signe des champs différents</p>
+              <p className="hidden sm:block text-[10px] font-normal mt-0.5 opacity-80">Chacun signe des champs différents</p>
             </button>
             <button
               onClick={() => setSendMode('bulk')}
@@ -160,14 +160,14 @@ export default function SendScreen({ documentId, signerCount = 1, onBack, onSent
                 </svg>
                 Envoi groupé
               </div>
-              <p className="text-[10px] font-normal mt-0.5 opacity-80">Même document, chacun signe seul</p>
+              <p className="hidden sm:block text-[10px] font-normal mt-0.5 opacity-80">Même document, chacun signe seul</p>
             </button>
           </div>
 
           {/* Sender info */}
           <div className="mb-5">
             <p className="text-[10px] font-bold text-[#555] uppercase tracking-wider mb-2">Expéditeur</p>
-            <div className="flex gap-2 mb-2">
+            <div className="flex flex-col sm:flex-row gap-2 mb-2">
               <input
                 value={senderName}
                 onChange={e => setSenderName(e.target.value)}
@@ -212,7 +212,7 @@ export default function SendScreen({ documentId, signerCount = 1, onBack, onSent
                         </div>
                         <span className="text-[11px] font-semibold" style={{ color: c }}>Signataire {i + 1}</span>
                       </div>
-                      <div className="flex gap-2 pl-7">
+                      <div className="flex flex-col sm:flex-row gap-2 pl-7">
                         <input
                           value={r.name}
                           onChange={e => updateRecipient(i, 'name', e.target.value)}

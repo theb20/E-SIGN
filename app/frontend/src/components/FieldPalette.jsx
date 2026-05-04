@@ -106,7 +106,7 @@ export default function FieldPalette({ mode, fields, signatures, placingType, ne
                 </svg>
                 <span className="text-[12px] font-medium" style={{ color: active ? activeColor : '#444' }}>{label}</span>
                 {active && (
-                  <span className="ml-auto text-[10px] font-bold" style={{ color: activeColor }}>✦</span>
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full shrink-0" style={{ background: activeColor }} />
                 )}
               </button>
             )

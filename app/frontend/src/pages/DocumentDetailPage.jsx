@@ -12,12 +12,12 @@ const STATUS_COLOR = {
 const STATUS_LABEL = { draft: 'Brouillon', pending: 'En attente', completed: 'Complété' }
 
 const EVENT_META = {
-  created:             { icon: '📄', label: 'Document créé',          color: '#888888' },
-  sent:                { icon: '📤', label: 'Document envoyé',         color: '#1473E6' },
-  viewed:              { icon: '👁',  label: 'Lien ouvert',            color: '#7B4FFF' },
-  field_signed:        { icon: '✍️',  label: 'Champ signé',            color: '#E87722' },
-  completed:           { icon: '✅',  label: 'Destinataire a complété', color: '#2DA44E' },
-  document_completed:  { icon: '🏆', label: 'Document entièrement signé', color: '#2DA44E' },
+  created:            { label: 'Document créé',             color: '#888888', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+  sent:               { label: 'Document envoyé',           color: '#1473E6', icon: 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8' },
+  viewed:             { label: 'Lien ouvert',               color: '#7B4FFF', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' },
+  field_signed:       { label: 'Champ signé',               color: '#E87722', icon: 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z' },
+  completed:          { label: 'Destinataire a complété',   color: '#2DA44E', icon: 'M5 13l4 4L19 7' },
+  document_completed: { label: 'Document entièrement signé', color: '#2DA44E', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
 }
 
 function StatusBadge({ status }) {
@@ -111,25 +111,25 @@ export default function DocumentDetailPage() {
   return (
     <div className="min-h-screen bg-[#F4F4F4]">
       {/* Topbar */}
-      <div className="h-12 bg-[#2B2B2B] flex items-center px-6 gap-3 border-b border-black/40">
-        <button onClick={() => navigate('/')} className="flex items-center gap-1.5 text-[#888] hover:text-white transition-colors text-xs shrink-0">
+      <div className="h-12 bg-[#2B2B2B] flex items-center px-3 sm:px-6 gap-2 sm:gap-3 border-b border-black/40">
+        <button onClick={() => navigate('/')} className="flex items-center gap-1 sm:gap-1.5 text-[#888] hover:text-white transition-colors text-xs shrink-0">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Documents
+          <span className="hidden sm:inline">Documents</span>
         </button>
-        <div className="w-px h-5 bg-white/15" />
+        <div className="w-px h-5 bg-white/15 shrink-0" />
         <div className="w-5 h-5 rounded flex items-center justify-center bg-[#FA0F00] shrink-0">
           <svg className="w-3 h-3" fill="none" viewBox="0 0 20 20">
             <path d="M3 3h9l5 5v9H3V3z" fill="white" />
           </svg>
         </div>
-        <span className="text-[#C0C0C0] text-xs truncate flex-1">{doc.title}</span>
+        <span className="text-[#C0C0C0] text-xs truncate flex-1 min-w-0">{doc.title}</span>
         <StatusBadge status={doc.status} />
         {['draft','pending'].includes(doc.status) && (
           <button
             onClick={handleCancel} disabled={cancelling}
-            className="flex items-center gap-1.5 h-7 px-3 text-[#CC4444] text-xs font-semibold border border-[#CC4444]/30 hover:bg-[#CC4444]/10 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 h-7 px-3 text-[#CC4444] text-xs font-semibold border border-[#CC4444]/30 hover:bg-[#CC4444]/10 transition-colors disabled:opacity-50 shrink-0"
             style={{ borderRadius: '2px' }}
           >
             {cancelling ? '…' : 'Annuler'}
@@ -137,7 +137,7 @@ export default function DocumentDetailPage() {
         )}
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
 
         {/* Document info card */}
         <div className="bg-white border border-[#E8E8E8]" style={{ borderRadius: '2px' }}>
@@ -448,9 +448,12 @@ export default function DocumentDetailPage() {
                     return (
                       <div key={log.id} className="flex gap-4 items-start relative">
                         {/* Dot */}
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[14px] z-10 bg-white border-2"
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 bg-white border-2"
                           style={{ borderColor: meta.color }}>
-                          {meta.icon}
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            style={{ color: meta.color }}>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={meta.icon} />
+                          </svg>
                         </div>
 
                         <div className="flex-1 min-w-0 pt-0.5">

@@ -97,6 +97,7 @@ export default function SigningPage() {
   const required     = fields.filter(f => f.required)
   const allSigned    = required.length > 0 && required.every(f => signatures[f.id])
   const nextUnsigned = required.find(f => !signatures[f.id])
+  const signedCount  = required.filter(f => signatures[f.id]).length
   const signingField = fields.find(f => f.id === signingId) ?? null
 
   const goToNext = () => {
@@ -182,7 +183,7 @@ export default function SigningPage() {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-[#2B2B2B]">
       {/* Simplified header for recipient */}
-      <div className="h-11 flex items-center px-4 gap-3 shrink-0 border-b border-black/40 bg-[#2B2B2B]">
+      <div className="h-11 flex items-center px-3 sm:px-4 gap-2 sm:gap-3 shrink-0 border-b border-black/40 bg-[#2B2B2B]">
         <div className="w-6 h-6 rounded flex items-center justify-center bg-[#FA0F00]">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 20 20">
             <path d="M3 3h9l5 5v9H3V3z" fill="white" />
@@ -208,7 +209,7 @@ export default function SigningPage() {
         </button>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden min-h-0">
         <FieldPalette
           mode="sign" fields={fields} signatures={signatures}
           nextUnsignedId={nextUnsigned?.id}
@@ -237,6 +238,36 @@ export default function SigningPage() {
           onSignField={handleFieldClick}
           onComplete={handleComplete}
         />
+      </div>
+
+      {/* Mobile bottom bar */}
+      <div className="md:hidden shrink-0 border-t border-[#E0E0E0] bg-white px-4 py-3 flex items-center gap-3"
+        style={{ background: allSigned ? '#F0FAF4' : 'white' }}>
+        <div className="flex-1 min-w-0">
+          <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
+            <div className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: required.length ? `${(signedCount / required.length) * 100}%` : '0%',
+                background: allSigned ? '#2DA44E' : '#1473E6',
+              }} />
+          </div>
+          <p className="text-[11px] truncate" style={{ color: allSigned ? '#2DA44E' : '#888' }}>
+            {allSigned
+              ? 'Tous les champs sont remplis'
+              : `${required.length - signedCount} champ${required.length - signedCount > 1 ? 's' : ''} restant${required.length - signedCount > 1 ? 's' : ''}`}
+          </p>
+        </div>
+        <button
+          onClick={allSigned ? handleComplete : goToNext}
+          className="shrink-0 flex items-center gap-2 px-4 py-2 text-white text-[13px] font-semibold transition-all"
+          style={{ background: allSigned ? '#2DA44E' : '#1473E6', borderRadius: '2px' }}
+        >
+          {allSigned ? 'Finaliser' : 'Suivant'}
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
+              d={allSigned ? 'M5 13l4 4L19 7' : 'M9 5l7 7-7 7'} />
+          </svg>
+        </button>
       </div>
 
       {signingField && (

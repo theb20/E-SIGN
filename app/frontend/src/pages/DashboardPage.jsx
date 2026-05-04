@@ -90,7 +90,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#F4F4F4]">
       {/* Topbar */}
-      <div className="h-12 bg-[#2B2B2B] flex items-center px-6 gap-3 border-b border-black/40">
+      <div className="h-12 bg-[#2B2B2B] flex items-center px-3 sm:px-6 gap-3 border-b border-black/40">
         <div className="w-6 h-6 rounded flex items-center justify-center bg-[#FA0F00] shrink-0">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 20 20">
             <path d="M3 3h9l5 5v9H3V3z" fill="white" opacity="0.95" />
@@ -112,9 +112,9 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         {/* Header + search */}
-        <div className="flex flex-wrap items-center gap-4 mb-6">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div className="flex-1 min-w-0">
             <h1 className="text-[22px] font-bold text-[#1B1B1B]">Documents</h1>
             <p className="text-[13px] text-[#888] mt-0.5">
@@ -124,15 +124,15 @@ export default function DashboardPage() {
           </div>
 
           {/* Search */}
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#AAAAAA]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Rechercher…"
-              className="pl-8 pr-3 py-1.5 text-[12px] border border-[#DDDDDD] focus:outline-none focus:border-[#1473E6] transition-colors"
-              style={{ borderRadius: '2px', width: '200px' }}
+              className="w-full sm:w-[200px] pl-8 pr-3 py-1.5 text-[12px] border border-[#DDDDDD] focus:outline-none focus:border-[#1473E6] transition-colors"
+              style={{ borderRadius: '2px' }}
             />
           </div>
 
@@ -198,51 +198,86 @@ export default function DashboardPage() {
         )}
 
         {!loading && filtered.length > 0 && (
-          <div className="bg-white border border-[#E8E8E8] overflow-hidden" style={{ borderRadius: '2px' }}>
-            <div className="grid gap-4 px-5 py-2.5 border-b border-[#F0F0F0] bg-[#FAFAFA]"
-              style={{ gridTemplateColumns: '1fr 110px 100px 110px 90px 36px' }}>
-              {['Document', 'Expéditeur', 'Statut', 'Signatures', 'Date', ''].map((h, i) => (
-                <span key={i} className="text-[10px] font-bold text-[#AAAAAA] uppercase tracking-wider">{h}</span>
-              ))}
-            </div>
-
-            {filtered.map((doc, i) => (
-              <div
-                key={doc.id}
-                className="grid gap-4 px-5 py-3.5 items-center transition-colors hover:bg-[#F8F8F8]"
-                style={{
-                  gridTemplateColumns: '1fr 110px 100px 110px 90px 36px',
-                  borderBottom: i < filtered.length - 1 ? '1px solid #F5F5F5' : 'none',
-                }}
-              >
-                <button
+          <>
+            {/* Mobile card list (< md) */}
+            <div className="md:hidden space-y-2">
+              {filtered.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="bg-white border border-[#E8E8E8] p-3 flex items-center gap-3 transition-colors active:bg-[#F8F8F8]"
+                  style={{ borderRadius: '2px' }}
                   onClick={() => navigate(`/documents/${doc.id}`)}
-                  className="flex items-center gap-3 min-w-0 text-left"
                 >
-                  <div className="w-8 h-8 rounded flex items-center justify-center shrink-0"
+                  <div className="w-9 h-9 rounded flex items-center justify-center shrink-0"
                     style={{ background: doc.file_type === 'pdf' ? '#FFF0F0' : '#F0F4FF' }}>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                       style={{ color: doc.file_type === 'pdf' ? '#FA0F00' : '#1473E6' }}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                         d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <div className="min-w-0">
+                  <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold text-[#1B1B1B] truncate">{doc.title}</p>
-                    <p className="text-[11px] text-[#AAAAAA] truncate">{doc.file_name}</p>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <StatusBadge status={doc.status} />
+                      <Progress signed={Number(doc.signed_count)} total={Number(doc.recipient_count)} />
+                    </div>
+                    <p className="text-[10px] text-[#AAAAAA] mt-0.5">
+                      {new Date(doc.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </p>
                   </div>
-                </button>
+                  <DownloadBtn doc={doc} />
+                </div>
+              ))}
+            </div>
 
-                <span className="text-[12px] text-[#555] truncate">{doc.sender_name || '—'}</span>
-                <div><StatusBadge status={doc.status} /></div>
-                <Progress signed={Number(doc.signed_count)} total={Number(doc.recipient_count)} />
-                <span className="text-[11px] text-[#AAAAAA]">
-                  {new Date(doc.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
-                </span>
-                <DownloadBtn doc={doc} />
+            {/* Desktop table (md+) */}
+            <div className="hidden md:block bg-white border border-[#E8E8E8] overflow-hidden" style={{ borderRadius: '2px' }}>
+              <div className="grid gap-4 px-5 py-2.5 border-b border-[#F0F0F0] bg-[#FAFAFA]"
+                style={{ gridTemplateColumns: '1fr 110px 100px 110px 90px 36px' }}>
+                {['Document', 'Expéditeur', 'Statut', 'Signatures', 'Date', ''].map((h, i) => (
+                  <span key={i} className="text-[10px] font-bold text-[#AAAAAA] uppercase tracking-wider">{h}</span>
+                ))}
               </div>
-            ))}
-          </div>
+
+              {filtered.map((doc, i) => (
+                <div
+                  key={doc.id}
+                  className="grid gap-4 px-5 py-3.5 items-center transition-colors hover:bg-[#F8F8F8]"
+                  style={{
+                    gridTemplateColumns: '1fr 110px 100px 110px 90px 36px',
+                    borderBottom: i < filtered.length - 1 ? '1px solid #F5F5F5' : 'none',
+                  }}
+                >
+                  <button
+                    onClick={() => navigate(`/documents/${doc.id}`)}
+                    className="flex items-center gap-3 min-w-0 text-left"
+                  >
+                    <div className="w-8 h-8 rounded flex items-center justify-center shrink-0"
+                      style={{ background: doc.file_type === 'pdf' ? '#FFF0F0' : '#F0F4FF' }}>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        style={{ color: doc.file_type === 'pdf' ? '#FA0F00' : '#1473E6' }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                          d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-[#1B1B1B] truncate">{doc.title}</p>
+                      <p className="text-[11px] text-[#AAAAAA] truncate">{doc.file_name}</p>
+                    </div>
+                  </button>
+
+                  <span className="text-[12px] text-[#555] truncate">{doc.sender_name || '—'}</span>
+                  <div><StatusBadge status={doc.status} /></div>
+                  <Progress signed={Number(doc.signed_count)} total={Number(doc.recipient_count)} />
+                  <span className="text-[11px] text-[#AAAAAA]">
+                    {new Date(doc.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </span>
+                  <DownloadBtn doc={doc} />
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

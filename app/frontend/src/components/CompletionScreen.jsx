@@ -7,14 +7,14 @@ export default function CompletionScreen({ doc, fields }) {
   const signedDate = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 
   return (
-    <div className="min-h-screen bg-[#F4F4F4] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[#F4F4F4] flex items-center justify-center p-4 sm:p-6">
       <div
         className={`bg-white w-full max-w-md transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
         style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.12)', borderRadius: '2px' }}
       >
         <div className="h-1.5 bg-[#2DA44E] rounded-t-sm" />
 
-        <div className="p-8 text-center">
+        <div className="p-5 sm:p-8 text-center">
           <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-[#E8F5E9] flex items-center justify-center">
             <svg className="w-8 h-8 text-[#2DA44E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
