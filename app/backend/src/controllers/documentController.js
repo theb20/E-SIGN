@@ -85,7 +85,7 @@ export async function sendDocument(req, res) {
       await Field.assignToRecipients(id, created.map((r, i) => ({ id: r.id, signerIndex: i })))
     }
 
-    const baseUrl  = process.env.FRONTEND_URL
+    const baseUrl  = process.env.FRONTEND_URL || 'http://localhost:5173'
     const result   = created.map(r => ({
       id:         r.id,
       name:       r.name,
