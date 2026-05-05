@@ -116,3 +116,15 @@ export async function deleteTemplate(id) {
   if (!res.ok) throw new Error((await res.json()).error)
   return res.json()
 }
+
+export async function deleteDocument(id) {
+  const res = await fetch(`${BASE}/documents/${id}`, { method: 'DELETE' })
+  if (!res.ok) throw new Error((await res.json()).error)
+  return res.json()
+}
+
+export async function clearAllUploads() {
+  const res = await fetch(`${BASE}/admin/clear-uploads`, { method: 'DELETE' })
+  if (!res.ok) throw new Error((await res.json()).error)
+  return res.json()
+}

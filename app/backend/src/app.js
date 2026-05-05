@@ -40,12 +40,21 @@ app.use('/api/templates', templateRoutes)
 
 app.get('/api/health', (_req, res) => res.json({ ok: true, ts: new Date() }))
 
-/* ── TEMP: clear uploads ─────────────────────────────────── */
-app.delete('/api/admin/clear-uploads', (_req, res) => {
+/* ── Admin: clear all uploads + DB records ───────────────── */
+app.delete('/api/admin/clear-uploads', async (_req, res) => {
   try {
-    const files = fs.readdirSync(UPLOAD_DIR)
-    files.forEach(f => fs.unlinkSync(path.join(UPLOAD_DIR, f)))
-    res.json({ deleted: files.length, files })
+    const { default: Document } = await import('./models/Document.js')
+    const docs = await Document.listAll()
+    let deleted = 0
+    for (const doc of docs) {
+      const fp = path.join(UPLOAD_DIR, doc.file_path)
+      if (fs.existsSync(fp)) { fs.unlinkSync(fp); deleted++ }
+      await Document.delete(doc.id)
+    }
+    // also remove orphan files not in DB
+    const remaining = fs.readdirSync(UPLOAD_DIR)
+    remaining.forEach(f => { fs.unlinkSync(path.join(UPLOAD_DIR, f)); deleted++ })
+    res.json({ deleted })
   } catch (err) {
     res.status(500).json({ error: err.message })
   }

@@ -111,6 +111,24 @@ export async function sendDocument(req, res) {
   }
 }
 
+/* DELETE /api/documents/:id */
+export async function deleteDocument(req, res) {
+  try {
+    const { id } = req.params
+    const doc = await Document.findById(id)
+    if (!doc) return res.status(404).json({ error: 'Document introuvable' })
+
+    const filePath = path.join(__dirname, '../../uploads', doc.file_path)
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
+
+    await Document.delete(id)
+    res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: err.message })
+  }
+}
+
 /* GET /api/documents/:id/file */
 export async function serveFile(req, res) {
   try {

@@ -35,4 +35,13 @@ export default class Document {
   static async setHash(id, hash) {
     await pool.execute('UPDATE documents SET file_hash = ? WHERE id = ?', [hash, id])
   }
+
+  static async delete(id) {
+    await pool.execute('DELETE FROM documents WHERE id = ?', [id])
+  }
+
+  static async listAll() {
+    const [rows] = await pool.execute('SELECT id, file_path FROM documents')
+    return rows
+  }
 }
