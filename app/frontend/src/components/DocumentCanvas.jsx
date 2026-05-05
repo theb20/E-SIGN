@@ -10,25 +10,30 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString()
 
+const RENDER_WIDTH = 794   // coordinate space used for storing field positions
+
 export default function DocumentCanvas({
   doc, fields, selectedId, editingId, placingType, signatures, mode,
   onPlaceField, onSelectField, onMoveField, onResizeField, onFieldClick,
   onCommitText, onCancelEdit,
 }) {
   const containerRef = useRef(null)
-  const pageRefs     = useRef({})          // { [pageNum]: domNode }
-  const [pageWidth, setPageWidth] = useState(794)
+  const pageRefs     = useRef({})
+  const [pageWidth, setPageWidth] = useState(null)   // null = not yet measured
   const [numPages,  setNumPages]  = useState(1)
   const [cursor,    setCursor]    = useState({ x: 0, y: 0 })
 
-  /* responsive width */
+  /* responsive width — ResizeObserver fires before first paint on mobile */
   useEffect(() => {
-    const update = () => {
-      if (containerRef.current) setPageWidth(Math.min(containerRef.current.clientWidth - 64, 794))
+    if (!containerRef.current) return
+    const measure = (w) => {
+      const margin = w < 640 ? 0 : 64
+      setPageWidth(Math.min(w - margin, RENDER_WIDTH))
     }
-    update()
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
+    const ro = new ResizeObserver(entries => measure(entries[0].contentRect.width))
+    ro.observe(containerRef.current)
+    measure(containerRef.current.clientWidth)  // immediate fallback
+    return () => ro.disconnect()
   }, [])
 
   /* reset page count when document changes */
@@ -43,15 +48,22 @@ export default function DocumentCanvas({
     return () => window.removeEventListener('mousemove', h)
   }, [])
 
-  /* click on a page to place field */
+  const scale = pageWidth ? pageWidth / RENDER_WIDTH : 1
+
+  /* click on a page to place field — convert screen coords to 794px space */
   const handlePageClick = useCallback((e, pageNum) => {
     if (!placingType || mode !== 'place') return
     const node = pageRefs.current[pageNum]
     if (!node) return
     e.stopPropagation()
     const rect = node.getBoundingClientRect()
-    onPlaceField(placingType, e.clientX - rect.left, e.clientY - rect.top, pageNum)
-  }, [placingType, mode, onPlaceField])
+    onPlaceField(
+      placingType,
+      (e.clientX - rect.left) / scale,
+      (e.clientY - rect.top)  / scale,
+      pageNum,
+    )
+  }, [placingType, mode, onPlaceField, scale])
 
   const ghostDef   = placingType ? FIELD_DEFAULTS[placingType] : null
   const ghostColor = placingType ? FIELD_COLORS[placingType]   : null
@@ -61,7 +73,7 @@ export default function DocumentCanvas({
   return (
     <main
       ref={containerRef}
-      className="flex-1 overflow-y-auto py-6 px-4 relative"
+      className="flex-1 overflow-y-auto overflow-x-hidden py-4 sm:py-6 relative"
       style={{ background: '#525659', cursor: placingType ? 'crosshair' : 'default' }}
     >
       {/* Ghost element following cursor */}
@@ -69,10 +81,10 @@ export default function DocumentCanvas({
         <div
           className="pointer-events-none fixed z-50"
           style={{
-            left:   cursor.x - ghostDef.width / 2,
-            top:    cursor.y - ghostDef.height / 2,
-            width:  ghostDef.width,
-            height: ghostDef.height,
+            left:   cursor.x - ghostDef.width  * scale / 2,
+            top:    cursor.y - ghostDef.height * scale / 2,
+            width:  ghostDef.width  * scale,
+            height: ghostDef.height * scale,
             border: `2px dashed ${ghostColor}`,
             background: `${ghostColor}18`,
             borderRadius: '2px',
@@ -85,9 +97,8 @@ export default function DocumentCanvas({
         </div>
       )}
 
-      {/* All pages */}
-      {doc?.type === 'image' ? (
-        /* Images are single-page */
+      {/* Wait for measurement before rendering the document */}
+      {pageWidth && (doc?.type === 'image' ? (
         <div
           ref={el => { pageRefs.current[1] = el }}
           className="mx-auto relative select-none"
@@ -96,7 +107,7 @@ export default function DocumentCanvas({
         >
           <img src={doc.url} alt="Document" className="block w-full" draggable={false} />
           <PageFields pageNum={1} fields={fields} selectedId={selectedId} editingId={editingId}
-            signatures={signatures} mode={mode}
+            signatures={signatures} mode={mode} scale={scale}
             onSelectField={onSelectField} onFieldClick={onFieldClick}
             onMoveField={onMoveField} onResizeField={onResizeField}
             onCommitText={onCommitText} onCancelEdit={onCancelEdit}
@@ -107,7 +118,7 @@ export default function DocumentCanvas({
           file={doc.url}
           onLoadSuccess={({ numPages: n }) => setNumPages(n)}
         >
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
             {pagesArray.map(pageNum => (
               <div
                 key={pageNum}
@@ -128,7 +139,7 @@ export default function DocumentCanvas({
                   renderAnnotationLayer={false}
                 />
                 <PageFields pageNum={pageNum} fields={fields} selectedId={selectedId} editingId={editingId}
-                  signatures={signatures} mode={mode}
+                  signatures={signatures} mode={mode} scale={scale}
                   onSelectField={onSelectField} onFieldClick={onFieldClick}
                   onMoveField={onMoveField} onResizeField={onResizeField}
                   onCommitText={onCommitText} onCancelEdit={onCancelEdit}
@@ -141,15 +152,15 @@ export default function DocumentCanvas({
         <div
           ref={el => { pageRefs.current[1] = el }}
           className="mx-auto relative select-none bg-white"
-          style={{ width: pageWidth, height: 1100, boxShadow: '0 1px 4px rgba(0,0,0,0.6), 0 8px 20px rgba(0,0,0,0.35)' }}
+          style={{ width: pageWidth, height: 1100 * scale, boxShadow: '0 1px 4px rgba(0,0,0,0.6), 0 8px 20px rgba(0,0,0,0.35)' }}
           onClick={e => handlePageClick(e, 1)}
         />
-      )}
+      ))}
 
       {/* Tip when in place mode */}
       {mode === 'place' && placingType && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#1B1B1B] text-white text-xs px-4 py-2 rounded-full shadow-lg z-40 pointer-events-none">
-          Cliquez sur le document pour placer le champ · <span className="opacity-60">Échap pour annuler</span>
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#1B1B1B] text-white text-xs px-4 py-2 rounded-full shadow-lg z-40 pointer-events-none whitespace-nowrap">
+          Cliquez sur le document pour placer le champ
         </div>
       )}
 
@@ -159,7 +170,7 @@ export default function DocumentCanvas({
 }
 
 /* Fields overlay for a single page */
-function PageFields({ pageNum, fields, selectedId, editingId, signatures, mode,
+function PageFields({ pageNum, fields, selectedId, editingId, signatures, mode, scale,
   onSelectField, onFieldClick, onMoveField, onResizeField, onCommitText, onCancelEdit }) {
   const pageFields = fields.filter(f => (f.page ?? 1) === pageNum)
   return (
@@ -168,6 +179,7 @@ function PageFields({ pageNum, fields, selectedId, editingId, signatures, mode,
         <PlacedField
           key={field.id}
           field={field}
+          scale={scale}
           isSelected={selectedId === field.id}
           isEditing={editingId === field.id}
           signature={signatures[field.id]}

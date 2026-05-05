@@ -64,6 +64,8 @@ function DownloadBtn({ doc }) {
 
 const STATUS_FILTERS = ['all', 'draft', 'pending', 'completed', 'cancelled']
 
+const API = (import.meta.env.VITE_API_URL ?? 'http://localhost:3001') + '/api'
+
 export default function DashboardPage() {
   const navigate  = useNavigate()
   const [documents,    setDocuments]    = useState([])
@@ -71,6 +73,23 @@ export default function DashboardPage() {
   const [error,        setError]        = useState(null)
   const [search,       setSearch]       = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [clearing,     setClearing]     = useState(false)
+  const [clearMsg,     setClearMsg]     = useState(null)
+
+  const clearUploads = async () => {
+    if (!window.confirm('Supprimer tous les fichiers uploadés sur le serveur ?')) return
+    setClearing(true)
+    setClearMsg(null)
+    try {
+      const res = await fetch(`${API}/admin/clear-uploads`, { method: 'DELETE' })
+      const data = await res.json()
+      setClearMsg(data.error ? `Erreur : ${data.error}` : `${data.deleted} fichier(s) supprimé(s)`)
+    } catch {
+      setClearMsg('Erreur réseau')
+    } finally {
+      setClearing(false)
+    }
+  }
 
   useEffect(() => {
     listDocuments()
@@ -100,6 +119,22 @@ export default function DashboardPage() {
         <span className="text-[#EBEBEB] text-xs font-semibold tracking-widest">E·SIGN</span>
         <div className="w-px h-5 bg-white/15" />
         <span className="text-[#888] text-xs flex-1">Tableau de bord</span>
+        <button
+          onClick={clearUploads}
+          disabled={clearing}
+          title="Supprimer tous les fichiers du serveur"
+          className="flex items-center gap-1.5 h-7 px-3 text-[#CC4444] text-xs font-semibold rounded transition-all border border-[#CC4444]/30 hover:bg-[#CC4444]/10 disabled:opacity-50"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          {clearing ? '…' : 'Vider fichiers'}
+        </button>
+        {clearMsg && (
+          <span className="text-[11px] font-medium" style={{ color: clearMsg.startsWith('Erreur') ? '#CC4444' : '#2DA44E' }}>
+            {clearMsg}
+          </span>
+        )}
         <button
           onClick={() => navigate('/new')}
           className="flex items-center gap-1.5 h-7 px-3.5 text-white text-xs font-semibold rounded transition-all hover:opacity-90"

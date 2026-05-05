@@ -81,14 +81,20 @@ export default function AdoptModal({ field, onSave, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4"
       style={{ background: 'rgba(0,0,0,0.6)' }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white w-full max-w-[460px] animate-slide-up" style={{ borderRadius: '2px', boxShadow: '0 4px 32px rgba(0,0,0,0.35)' }}>
+      <div className="bg-white w-full sm:max-w-[460px] animate-slide-up max-h-[92vh] overflow-y-auto rounded-t-xl sm:rounded-none"
+        style={{ boxShadow: '0 -4px 32px rgba(0,0,0,0.35)' }}>
+
+        {/* Drag handle — mobile only */}
+        <div className="sm:hidden flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-[#DDDDDD]" />
+        </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E8E8E8]">
+        <div className="flex items-center justify-between px-5 py-3 sm:py-4 border-b border-[#E8E8E8]">
           <div>
             <h2 className="text-[14px] font-bold text-[#1B1B1B]">
               {field.type === 'initials' ? 'Créez vos initiales' : 'Créez votre signature'}

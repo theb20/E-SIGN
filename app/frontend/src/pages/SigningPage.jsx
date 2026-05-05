@@ -22,6 +22,7 @@ export default function SigningPage() {
   const [refuseModal, setRefuseModal] = useState(false)
   const [refuseReason, setRefuseReason] = useState('')
   const [refusing,  setRefusing]    = useState(false)
+  const [fieldDrawer, setFieldDrawer] = useState(false)
 
   /* ── load session ───────────────────────────────────────── */
   useEffect(() => {
@@ -199,13 +200,13 @@ export default function SigningPage() {
         )}
         <button
           onClick={() => setRefuseModal(true)}
-          className="shrink-0 flex items-center gap-1.5 h-7 px-3 text-[#CC4444] text-xs font-semibold border border-[#CC4444]/30 hover:bg-[#CC4444]/10 transition-colors"
+          className="shrink-0 flex items-center gap-1.5 h-7 px-2 sm:px-3 text-[#CC4444] text-xs font-semibold border border-[#CC4444]/30 hover:bg-[#CC4444]/10 transition-colors"
           style={{ borderRadius: '2px' }}
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
-          Refuser
+          <span className="hidden sm:inline">Refuser</span>
         </button>
       </div>
 
@@ -241,8 +242,30 @@ export default function SigningPage() {
       </div>
 
       {/* Mobile bottom bar */}
-      <div className="md:hidden shrink-0 border-t border-[#E0E0E0] bg-white px-4 py-3 flex items-center gap-3"
+      <div className="md:hidden shrink-0 border-t border-[#E0E0E0] bg-white px-3 py-2.5 flex items-center gap-2"
         style={{ background: allSigned ? '#F0FAF4' : 'white' }}>
+
+        {/* Field list button */}
+        <button
+          onClick={() => setFieldDrawer(true)}
+          className="flex items-center gap-1.5 h-10 px-3 border border-[#DDDDDD] text-[#555] text-[12px] font-medium shrink-0 transition-colors active:bg-[#F5F5F5]"
+          style={{ borderRadius: '2px' }}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+          </svg>
+          <span className="relative">
+            Champs
+            {!allSigned && (
+              <span className="absolute -top-1.5 -right-3 w-4 h-4 rounded-full text-[9px] font-bold text-white flex items-center justify-center"
+                style={{ background: '#1473E6' }}>
+                {required.length - signedCount}
+              </span>
+            )}
+          </span>
+        </button>
+
+        {/* Progress bar */}
         <div className="flex-1 min-w-0">
           <div className="h-1.5 bg-[#EEEEEE] rounded-full overflow-hidden mb-1">
             <div className="h-full rounded-full transition-all duration-500"
@@ -251,15 +274,15 @@ export default function SigningPage() {
                 background: allSigned ? '#2DA44E' : '#1473E6',
               }} />
           </div>
-          <p className="text-[11px] truncate" style={{ color: allSigned ? '#2DA44E' : '#888' }}>
-            {allSigned
-              ? 'Tous les champs sont remplis'
-              : `${required.length - signedCount} champ${required.length - signedCount > 1 ? 's' : ''} restant${required.length - signedCount > 1 ? 's' : ''}`}
+          <p className="text-[10px] truncate" style={{ color: allSigned ? '#2DA44E' : '#888' }}>
+            {allSigned ? 'Tous les champs completes' : `${signedCount}/${required.length} signé${signedCount > 1 ? 's' : ''}`}
           </p>
         </div>
+
+        {/* Complete / Next button */}
         <button
           onClick={allSigned ? handleComplete : goToNext}
-          className="shrink-0 flex items-center gap-2 px-4 py-2 text-white text-[13px] font-semibold transition-all"
+          className="shrink-0 flex items-center gap-1.5 h-10 px-4 text-white text-[13px] font-semibold transition-all active:opacity-80"
           style={{ background: allSigned ? '#2DA44E' : '#1473E6', borderRadius: '2px' }}
         >
           {allSigned ? 'Finaliser' : 'Suivant'}
@@ -269,6 +292,71 @@ export default function SigningPage() {
           </svg>
         </button>
       </div>
+
+      {/* Mobile field list drawer */}
+      {fieldDrawer && (
+        <div className="md:hidden fixed inset-0 z-40" onClick={() => setFieldDrawer(false)}
+          style={{ background: 'rgba(0,0,0,0.4)' }}>
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[70vh] flex flex-col"
+            onClick={e => e.stopPropagation()}>
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-2 shrink-0">
+              <div className="w-10 h-1 rounded-full bg-[#DDDDDD]" />
+            </div>
+            <div className="px-4 pb-2 flex items-center justify-between shrink-0">
+              <p className="text-[13px] font-bold text-[#1B1B1B]">Champs à remplir</p>
+              <p className="text-[11px] text-[#888]">{signedCount}/{required.length} signés</p>
+            </div>
+            <div className="overflow-y-auto px-3 pb-4 space-y-2">
+              {fields.map((field, i) => {
+                const signed = !!signatures[field.id]
+                const isNext = field.id === nextUnsigned?.id
+                return (
+                  <button
+                    key={field.id}
+                    onClick={() => {
+                      setFieldDrawer(false)
+                      setTimeout(() => {
+                        document.getElementById(`f-${field.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                        if (!signed) handleFieldClick(field.id)
+                      }, 200)
+                    }}
+                    className="w-full flex items-center gap-3 p-3 text-left transition-colors active:bg-[#F5F5F5]"
+                    style={{
+                      border: signed ? '1px solid #A5D6A7' : isNext ? '1.5px solid #1473E6' : '1px solid #E5E5E5',
+                      background: signed ? '#F1FBF4' : isNext ? '#F0F7FF' : 'white',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
+                      style={{ background: signed ? '#2DA44E' : isNext ? '#1473E6' : '#DDDDDD' }}>
+                      {signed ? (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold truncate"
+                        style={{ color: signed ? '#2E7D32' : isNext ? '#1473E6' : '#333' }}>
+                        {field.label}
+                      </p>
+                      <p className="text-[11px] capitalize" style={{ color: signed ? '#4CAF50' : '#AAAAAA' }}>
+                        {field.type}{field.required && !signed ? ' · requis' : ''}
+                      </p>
+                    </div>
+                    {!signed && (
+                      <svg className="w-4 h-4 shrink-0 text-[#CCCCCC]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {signingField && (
         <SignatureModal field={signingField} onSave={saveSignature} onClose={() => setSigningId(null)} />

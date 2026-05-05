@@ -4,10 +4,7 @@ export default function Header({ doc, mode, fieldCount, onToggleMode, onSend, se
       {/* Logo */}
       <div className="flex items-center gap-2 shrink-0">
         <div className="w-6 h-6 rounded flex items-center justify-center bg-[#FA0F00]">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 20 20">
-            <path d="M3 3h9l5 5v9H3V3z" fill="white" opacity="0.95" />
-            <path d="M12 3v6h5" stroke="rgba(200,0,0,0.5)" strokeWidth="1.5" fill="none" />
-          </svg>
+          <img src="/logo-esign.png" alt="E-Sign" className="w-4 h-4" />
         </div>
         <span className="text-[#EBEBEB] text-xs font-semibold tracking-widest hidden sm:block">E·SIGN</span>
       </div>
