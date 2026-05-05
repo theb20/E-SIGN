@@ -226,6 +226,16 @@ export default function DashboardPage() {
               Annuler
             </button>
             <button
+              onClick={handleDownloadSelected}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-white text-[12px] font-semibold transition-all hover:opacity-90"
+              style={{ background: '#1473E6', borderRadius: '2px' }}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Télécharger
+            </button>
+            <button
               onClick={handleDeleteSelected}
               className="flex items-center gap-1.5 px-3 py-1.5 text-white text-[12px] font-semibold transition-all hover:opacity-90"
               style={{ background: '#CC4444', borderRadius: '2px' }}
@@ -233,7 +243,7 @@ export default function DashboardPage() {
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
-              Supprimer la sélection
+              Supprimer
             </button>
           </div>
         )}
@@ -324,23 +334,34 @@ export default function DashboardPage() {
                       </p>
                     </div>
 
-                    {/* Delete button */}
-                    <button
-                      onClick={() => { if (window.confirm(`Supprimer "${doc.title}" ?`)) handleDelete(doc.id) }}
-                      disabled={isDeleting}
-                      className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-[#FFF0F0] text-[#CCCCCC] hover:text-[#CC4444] shrink-0 disabled:opacity-40"
-                    >
-                      {isDeleting ? (
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                        </svg>
-                      ) : (
+                    <div className="flex items-center gap-1 shrink-0">
+                      {/* Download button */}
+                      <button
+                        onClick={() => downloadOne(doc)}
+                        className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-[#F0F7FF] text-[#CCCCCC] hover:text-[#1473E6]"
+                      >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                      )}
-                    </button>
+                      </button>
+                      {/* Delete button */}
+                      <button
+                        onClick={() => { if (window.confirm(`Supprimer "${doc.title}" ?`)) handleDelete(doc.id) }}
+                        disabled={isDeleting}
+                        className="w-8 h-8 flex items-center justify-center rounded transition-colors hover:bg-[#FFF0F0] text-[#CCCCCC] hover:text-[#CC4444] disabled:opacity-40"
+                      >
+                        {isDeleting ? (
+                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 )
               })}
@@ -350,7 +371,7 @@ export default function DashboardPage() {
             <div className="hidden md:block bg-white border border-[#E8E8E8] overflow-hidden" style={{ borderRadius: '2px' }}>
               {/* Table header */}
               <div className="grid gap-4 px-5 py-2.5 border-b border-[#F0F0F0] bg-[#FAFAFA]"
-                style={{ gridTemplateColumns: '32px 1fr 110px 100px 110px 90px 32px' }}>
+                style={{ gridTemplateColumns: '32px 1fr 110px 100px 110px 90px 64px' }}>
                 {/* Select all checkbox */}
                 <button
                   onClick={toggleAll}
@@ -379,7 +400,7 @@ export default function DashboardPage() {
                     key={doc.id}
                     className="grid gap-4 px-5 py-3.5 items-center transition-colors hover:bg-[#F8F8F8]"
                     style={{
-                      gridTemplateColumns: '32px 1fr 110px 100px 110px 90px 32px',
+                      gridTemplateColumns: '32px 1fr 110px 100px 110px 90px 64px',
                       borderBottom: i < filtered.length - 1 ? '1px solid #F5F5F5' : 'none',
                       background: isSelected ? '#FFF8F8' : undefined,
                       opacity: isDeleting ? 0.4 : 1,
@@ -426,23 +447,36 @@ export default function DashboardPage() {
                       {new Date(doc.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </span>
 
-                    {/* Delete button */}
-                    <button
-                      onClick={() => { if (window.confirm(`Supprimer "${doc.title}" ?`)) handleDelete(doc.id) }}
-                      disabled={isDeleting}
-                      className="w-7 h-7 flex items-center justify-center rounded transition-colors hover:bg-[#FFF0F0] text-[#DDDDDD] hover:text-[#CC4444] disabled:opacity-40"
-                    >
-                      {isDeleting ? (
-                        <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                        </svg>
-                      ) : (
+                    <div className="flex items-center gap-0.5">
+                      {/* Download */}
+                      <button
+                        onClick={() => downloadOne(doc)}
+                        className="w-7 h-7 flex items-center justify-center rounded transition-colors hover:bg-[#F0F7FF] text-[#DDDDDD] hover:text-[#1473E6]"
+                        title="Télécharger"
+                      >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                      )}
-                    </button>
+                      </button>
+                      {/* Delete */}
+                      <button
+                        onClick={() => { if (window.confirm(`Supprimer "${doc.title}" ?`)) handleDelete(doc.id) }}
+                        disabled={isDeleting}
+                        className="w-7 h-7 flex items-center justify-center rounded transition-colors hover:bg-[#FFF0F0] text-[#DDDDDD] hover:text-[#CC4444] disabled:opacity-40"
+                        title="Supprimer"
+                      >
+                        {isDeleting ? (
+                          <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                          </svg>
+                        ) : (
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 )
               })}
