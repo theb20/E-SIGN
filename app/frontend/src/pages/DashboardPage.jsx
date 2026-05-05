@@ -117,6 +117,20 @@ export default function DashboardPage() {
     }
   }
 
+  const downloadOne = (doc) => {
+    const a = document.createElement('a')
+    a.href = exportUrl(doc.id)
+    a.download = `${doc.title}_signé.pdf`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
+
+  const handleDownloadSelected = () => {
+    const docs = filtered.filter(d => selected.has(d.id))
+    docs.forEach((doc, i) => setTimeout(() => downloadOne(doc), i * 600))
+  }
+
   return (
     <div className="min-h-screen bg-[#F4F4F4]">
       {/* Topbar */}
